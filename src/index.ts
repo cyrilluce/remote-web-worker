@@ -27,20 +27,22 @@ typeof window !== "undefined" &&
               URL.createObjectURL(
                 new Blob(
                   [
-                    // Replace the `importScripts` function with
-                    // a patched version that will resolve relative URLs
-                    // to the remote script URL.
-                    //
-                    // Without a patched `importScripts` Webpack 5 generated worker chunks will fail with the following error:
-                    //
-                    // Uncaught (in promise) DOMException: Failed to execute 'importScripts' on 'WorkerGlobalScope':
-                    // The script at 'http://some.domain/worker.1e0e1e0e.js' failed to load.
-                    //
-                    // For minification, the inlined variable names are single letters:
-                    // i = original importScripts
-                    // a = arguments
-                    // u = URL
-                    `importScripts=((i)=>(...a)=>i(...a.map((u)=>''+new URL(u,"${url}"))))(importScripts);importScripts("${url}")`,
+                    options?.type === 'module'
+                      ? `import ${JSON.stringify(url)}`
+                      // Replace the `importScripts` function with
+                      // a patched version that will resolve relative URLs
+                      // to the remote script URL.
+                      //
+                      // Without a patched `importScripts` Webpack 5 generated worker chunks will fail with the following error:
+                      //
+                      // Uncaught (in promise) DOMException: Failed to execute 'importScripts' on 'WorkerGlobalScope':
+                      // The script at 'http://some.domain/worker.1e0e1e0e.js' failed to load.
+                      //
+                      // For minification, the inlined variable names are single letters:
+                      // i = original importScripts
+                      // a = arguments
+                      // u = URL
+                      : `importScripts=((i)=>(...a)=>i(...a.map((u)=>''+new URL(u,"${url}"))))(importScripts);importScripts("${url}")`,
                   ],
                   { type: "text/javascript" }
                 )
